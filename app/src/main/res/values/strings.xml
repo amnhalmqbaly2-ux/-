@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">قريتي كتابي الصغير</string>
+    <string name="app_subtitle">حِكَايَاتٌ مِنَ القَرْيَةِ العُمَانِيَّةِ وَالتَّشْخِيصُ القِرَائِيُّ</string>
+    <string name="sign_in_google">تسجيل الدخول عبر Google للمزامنة السحابية</string>
+    <string name="sign_out">تسجيل الخروج</string>
+    <string name="nav_journey">رحلة القرية</string>
+    <string name="nav_glossary">معجم القرية</string>
+    <string name="nav_ai_story">حكواتي الذكاء</string>
+    <string name="nav_dashboard">لوحة التشخيص</string>
+    <string name="pre_test_badge">المرحلة ١: الاختبار التشخيصي القبلي</string>
+    <string name="curriculum_badge">المرحلة ٢: قصص القرية العمانية للفهم</string>
+    <string name="post_test_badge">المرحلة ٣: الاختبار التشخيصي البعدي</string>
+    <string name="start_reading">ابدأ القراءة</string>
+    <string name="start_quiz">ابدأ اختبار الفهم</string>
+    <string name="listen_story">استمع للقصة</string>
+    <string name="stop_listening">إيقاف القراءة الصوتية</string>
+</resources>

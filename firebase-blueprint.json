@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "ChildProfile": {
+      "title": "ChildProfile",
+      "description": "Represents a child reader profile with progress, stars, badges, and diagnostic test scores.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique profile ID" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "name": { "type": "string", "description": "Child display name" },
+        "age": { "type": "integer", "description": "Child age between 6 and 10" },
+        "avatarId": { "type": "integer", "description": "Avatar identifier" },
+        "stars": { "type": "integer", "description": "Total stars earned" },
+        "badges": { "type": "string", "description": "Comma-separated earned badge IDs" },
+        "completedStoryIds": { "type": "string", "description": "Comma-separated completed story IDs" },
+        "preTestScore": { "type": "integer", "description": "Score on pre-diagnostic test (-1 if not taken)" },
+        "preTestTotal": { "type": "integer", "description": "Total questions on pre-diagnostic test" },
+        "postTestScore": { "type": "integer", "description": "Score on post-diagnostic test (-1 if not taken)" },
+        "postTestTotal": { "type": "integer", "description": "Total questions on post-diagnostic test" },
+        "postTestUnlockedByTeacher": { "type": "boolean", "description": "Whether teacher unlocked post-test manually" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["id", "userId", "name", "age", "avatarId", "stars", "badges", "completedStoryIds", "preTestScore", "preTestTotal", "postTestScore", "postTestTotal", "postTestUnlockedByTeacher", "createdAt", "updatedAt"]
+    },
+    "AssessmentRecord": {
+      "title": "AssessmentRecord",
+      "description": "Represents a completed diagnostic pre-test, story comprehension quiz, or post-test record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique assessment ID" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "profileId": { "type": "string", "description": "Child profile ID" },
+        "storyId": { "type": "string", "description": "Associated story ID" },
+        "storyTitle": { "type": "string", "description": "Story title" },
+        "assessmentType": { "type": "string", "enum": ["PRE_TEST", "STORY_PRACTICE", "POST_TEST"], "description": "Type of assessment" },
+        "score": { "type": "integer", "description": "Total correct answers" },
+        "totalQuestions": { "type": "integer", "description": "Total questions in assessment" },
+        "literalScore": { "type": "integer", "description": "Literal skill score (0 or 1)" },
+        "vocabularyScore": { "type": "integer", "description": "Vocabulary skill score (0 or 1)" },
+        "sequencingScore": { "type": "integer", "description": "Sequencing skill score (0 or 1)" },
+        "inferenceScore": { "type": "integer", "description": "Inference skill score (0 or 1)" },
+        "mainIdeaScore": { "type": "integer", "description": "Main idea skill score (0 or 1)" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["id", "userId", "profileId", "storyId", "storyTitle", "assessmentType", "score", "totalQuestions", "literalScore", "vocabularyScore", "sequencingScore", "inferenceScore", "mainIdeaScore", "createdAt"]
+    },
+    "CustomStory": {
+      "title": "CustomStory",
+      "description": "An AI-generated vocalized Omani village story with vocabulary and comprehension questions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique story ID" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "title": { "type": "string", "description": "Vocalized Arabic title" },
+        "villageName": { "type": "string", "description": "Omani village or setting name" },
+        "moral": { "type": "string", "description": "Educational moral of the story" },
+        "paragraphsText": { "type": "string", "description": "Serialized paragraphs separated by delimiter" },
+        "vocabularyText": { "type": "string", "description": "Serialized vocabulary items" },
+        "questionsText": { "type": "string", "description": "Serialized comprehension questions" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["id", "userId", "title", "villageName", "moral", "paragraphsText", "vocabularyText", "questionsText", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/profiles/{profileId}": {
+      "schema": { "$ref": "#/entities/ChildProfile" },
+      "description": "Child reader profiles synced per authenticated user."
+    },
+    "/users/{userId}/assessments/{assessmentId}": {
+      "schema": { "$ref": "#/entities/AssessmentRecord" },
+      "description": "Diagnostic pre-test, post-test, and story comprehension records per user."
+    },
+    "/users/{userId}/custom_stories/{storyId}": {
+      "schema": { "$ref": "#/entities/CustomStory" },
+      "description": "AI-generated Omani village stories saved by the user."
+    }
+  }
+}

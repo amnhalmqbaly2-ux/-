@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function isValidChildProfile(data) {
+      return data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.age is int && data.age >= 4 && data.age <= 15 &&
+             data.avatarId is int && data.avatarId >= 0 && data.avatarId <= 20 &&
+             data.stars is int && data.stars >= 0 && data.stars <= 100000 &&
+             data.badges is string && data.badges.size() <= 2000 &&
+             data.completedStoryIds is string && data.completedStoryIds.size() <= 4000 &&
+             data.preTestScore is int && data.preTestScore >= -1 && data.preTestScore <= 100 &&
+             data.preTestTotal is int && data.preTestTotal >= 0 && data.preTestTotal <= 100 &&
+             data.postTestScore is int && data.postTestScore >= -1 && data.postTestScore <= 100 &&
+             data.postTestTotal is int && data.postTestTotal >= 0 && data.postTestTotal <= 100 &&
+             data.postTestUnlockedByTeacher is bool &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidAssessmentRecord(data) {
+      return data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.profileId is string && data.profileId.size() >= 1 && data.profileId.size() <= 128 &&
+             data.storyId is string && data.storyId.size() >= 1 && data.storyId.size() <= 128 &&
+             data.storyTitle is string && data.storyTitle.size() >= 1 && data.storyTitle.size() <= 200 &&
+             data.assessmentType is string && (data.assessmentType == 'PRE_TEST' || data.assessmentType == 'STORY_PRACTICE' || data.assessmentType == 'POST_TEST') &&
+             data.score is int && data.score >= 0 && data.score <= 100 &&
+             data.totalQuestions is int && data.totalQuestions >= 1 && data.totalQuestions <= 100 &&
+             data.literalScore is int && data.literalScore >= 0 && data.literalScore <= 20 &&
+             data.vocabularyScore is int && data.vocabularyScore >= 0 && data.vocabularyScore <= 20 &&
+             data.sequencingScore is int && data.sequencingScore >= 0 && data.sequencingScore <= 20 &&
+             data.inferenceScore is int && data.inferenceScore >= 0 && data.inferenceScore <= 20 &&
+             data.mainIdeaScore is int && data.mainIdeaScore >= 0 && data.mainIdeaScore <= 20 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidCustomStory(data) {
+      return data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 300 &&
+             data.villageName is string && data.villageName.size() >= 1 && data.villageName.size() <= 200 &&
+             data.moral is string && data.moral.size() >= 1 && data.moral.size() <= 500 &&
+             data.paragraphsText is string && data.paragraphsText.size() >= 1 && data.paragraphsText.size() <= 20000 &&
+             data.vocabularyText is string && data.vocabularyText.size() <= 10000 &&
+             data.questionsText is string && data.questionsText.size() <= 15000 &&
+             data.createdAt is timestamp;
+    }
+
+    match /users/{userId}/profiles/{profileId} {
+      allow get: if isSignedIn() && request.auth.uid == userId && isValidId(profileId);
+      allow list: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(profileId) &&
+                       incoming().id == profileId &&
+                       incoming().keys().hasAll(['id', 'userId', 'name', 'age', 'avatarId', 'stars', 'badges', 'completedStoryIds', 'preTestScore', 'preTestTotal', 'postTestScore', 'postTestTotal', 'postTestUnlockedByTeacher', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['id', 'userId', 'name', 'age', 'avatarId', 'stars', 'badges', 'completedStoryIds', 'preTestScore', 'preTestTotal', 'postTestScore', 'postTestTotal', 'postTestUnlockedByTeacher', 'createdAt', 'updatedAt']) &&
+                       isValidChildProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(profileId) &&
+                       isValidChildProfile(incoming()) &&
+                       incoming().id == existing().id &&
+                       incoming().userId == existing().userId &&
+                       incoming().keys().hasOnly(['id', 'userId', 'name', 'age', 'avatarId', 'stars', 'badges', 'completedStoryIds', 'preTestScore', 'preTestTotal', 'postTestScore', 'postTestTotal', 'postTestUnlockedByTeacher', 'createdAt', 'updatedAt']);
+
+      allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(profileId);
+    }
+
+    match /users/{userId}/assessments/{assessmentId} {
+      allow get: if isSignedIn() && request.auth.uid == userId && isValidId(assessmentId);
+      allow list: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(assessmentId) &&
+                       incoming().id == assessmentId &&
+                       incoming().keys().hasAll(['id', 'userId', 'profileId', 'storyId', 'storyTitle', 'assessmentType', 'score', 'totalQuestions', 'literalScore', 'vocabularyScore', 'sequencingScore', 'inferenceScore', 'mainIdeaScore', 'createdAt']) &&
+                       incoming().keys().hasOnly(['id', 'userId', 'profileId', 'storyId', 'storyTitle', 'assessmentType', 'score', 'totalQuestions', 'literalScore', 'vocabularyScore', 'sequencingScore', 'inferenceScore', 'mainIdeaScore', 'createdAt']) &&
+                       isValidAssessmentRecord(incoming());
+
+      allow update: if false;
+      allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(assessmentId);
+    }
+
+    match /users/{userId}/custom_stories/{storyId} {
+      allow get: if isSignedIn() && request.auth.uid == userId && isValidId(storyId);
+      allow list: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(storyId) &&
+                       incoming().id == storyId &&
+                       incoming().keys().hasAll(['id', 'userId', 'title', 'villageName', 'moral', 'paragraphsText', 'vocabularyText', 'questionsText', 'createdAt']) &&
+                       incoming().keys().hasOnly(['id', 'userId', 'title', 'villageName', 'moral', 'paragraphsText', 'vocabularyText', 'questionsText', 'createdAt']) &&
+                       isValidCustomStory(incoming());
+
+      allow update: if false;
+      allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(storyId);
+    }
+  }
+}

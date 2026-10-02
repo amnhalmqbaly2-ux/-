@@ -1,0 +1,6 @@
+{
+  "name": "قريتي كتابي الصغير",
+  "description": "قصص تفاعلية مشكولة للأطفال من القرية العمانية مع اختبار فهم مقروء تشخيصي قبلي وبعدي، ومعجم مفردات تراثية، وتوليد قصص بالذكاء الاصطناعي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
